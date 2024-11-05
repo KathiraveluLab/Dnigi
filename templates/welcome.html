@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Alaska Map Game</title>
+
+    <link rel="stylesheet" href="/static/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+          integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/prunecluster/2.1.0/LeafletStyleSheet.min.css"
+          integrity="sha512-ZTsIKR9XmEgyAXmXVRpE+wvv2+72Kd0tBSieJGbe1oOydyEmRhzTWEIfpLAlC8IYxNhGq2eALt+G/kRgpqlzyA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css"
+          integrity="sha512-qveKnGrvOChbSzAdtSs8p69eoLegyh+1hwOMbmpCViIwj7rn4oJjdmMvWOuyQlTOZgTlZA0N2PXA7iA8/2TUYA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <link rel="stylesheet" href="/static/styles.css"/>
+
+</head>
+<body>
+
+<script src="/static/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prunecluster/2.1.0/PruneCluster.min.js"
+        integrity="sha512-TIhw+s9KAwyAGM7n2qG2hM+lvQxja1Hieb3nS3F2y9AFEDImo6SNXoooqmajF/D5lMfriBIasQ6N+pizlF0wTA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"
+        integrity="sha512-UOJe4paV6hYWBnS0c9GnIRH8PLm2nFK22uhfAvsTIqd3uwnWsVri1OPn5fJYdLtGY3wB11LGHJ4yPU1WFJeBYQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="{{ url_for('static', filename='map.js') }}" defer></script>
+
+<!-- 遮罩层 -->
+<div id="overlay" class="overlay"></div>
+
+<!-- 玩法说明卡片 -->
+<div id="game-instructions" class="instruction-card">
+    <h1>🎉 Welcome to <span>Dnigi</span> 🎉</h1>
+
+    <!-- 介绍 -->
+    <div class="section">
+        <h2>🌼 Introduction</h2>
+        <ul>
+            <li>
+                Dnigi, meaning "moose" 🫎 in Dena'ina, refers to a key animal in Alaska. The moose is a cultural symbol for
+                Indigenous peoples and plays an important role in the ecosystem.
+            </li>
+        </ul>
+    </div>
+
+    <!-- 任务目标 -->
+    <div class="section">
+        <h2>🌟 Aim</h2>
+        <ul>
+            <li>
+                We are a game of sharing knowledge about indigenous heritage. Let's find the Dena'ina area and unlock
+                the
+                treasure of Dena'ina!
+            </li>
+        </ul>
+    </div>
+
+    <!-- 操作指南 -->
+    <div class="section">
+        <h2>🚀 Guide</h2>
+        <ul>
+            <li>You can press the arrows to move the agent. (The Dena'ina area is in the lower middle of the entire
+                plate)
+            </li>
+            <li>You can click the agent to ask your questions. (If you don't know the specific questions, double-click
+                the search box to view sample questions.)
+            </li>
+            <li>There is a small test after the learning process.</li>
+        </ul>
+    </div>
+
+    <!-- 小提示 -->
+    <div class="section">
+        <h2>💡 Tips</h2>
+        <ul>
+            <li>
+                You can click on any of the blue areas on the map to view the language information of different
+                sections.
+            </li>
+        </ul>
+    </div>
+
+    <!-- 开始游戏按钮 -->
+    <button id="start-game-btn">START</button>
+</div>
+
+<!-- 问号按钮 -->
+<button id="help-btn" class="help-btn">?</button>
+
+
+<div id="map"></div>
+{#<button class="btn btn-primary btn-sm custom-button" onclick="showPopup()">Show Popup</button>#}
+
+
+<!-- Button trigger modal -->
+<button id="info-box" type="button" class="btn btn-primary btn-sm intro-button" data-bs-toggle="modal"
+        data-bs-target="#introModal">
+    Introduction
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="introModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Introduction of Dena'ina</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Dena'ina (Tanaina), the Athabascan language of the Cook Inlet area, has four dialects -- on the Kenai
+                Peninsula, in Upper Inlet area above Anchorage, and in coastal and inland areas on the west side of Cook
+                Inlet. Dena'ina is the only Alaska Athabascan language to be spoken in a coastal environment, and it is
+                the only Alaska Athabascan language spoken on both sides of the Alaska Range.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button id="video-box" type="button" class="btn btn-success btn-sm video-button" data-bs-toggle="modal"
+        data-bs-target="#videoModal">
+    Video
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Videos of Dena'ina</h5>
+                <button id="closeVideo" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <video id="myVideo" width="465px" controls>
+                    <source src="./static/cultureIntro.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <button id="closeVideoBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button id="audio-box" type="button" class="btn btn-warning btn-sm audio-button" data-bs-toggle="modal"
+        data-bs-target="#audioModal">
+    Audio
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="audioModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="audioFrame">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Audios of Dena'ina</h5>
+                <button id="closeAudio" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="myAudio" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
+                        src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1702873248&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+                </iframe>
+                <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;">
+                    <a href="https://soundcloud.com/denaina-language-institute" title="Dena&#x27;ina Language Institute"
+                       target="_blank" style="color: #cccccc; text-decoration: none;">Dena&#x27;ina Language
+                        Institute</a> ·
+                    <a href="https://soundcloud.com/denaina-language-institute/sets/greetings"
+                       title="Greetings" target="_blank"
+                       style="color: #cccccc; text-decoration: none;">Greetings</a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeAudioBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button id="alphabet-box" type="button" class="btn btn-danger btn-sm alphabet-button" data-bs-toggle="modal"
+        data-bs-target="#alphabetModal">
+    Alphabet
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="alphabetModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog alphabetModal">
+        <div class="modal-content alphabetContent">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Alphabet of Dena'ina</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img width="1030px" src="static/BasicCharacter.png" alt="Alphabet of Dena'ina">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button id="test-box" type="button" class="btn btn-dark btn-sm test-button" data-bs-toggle="modal"
+        data-bs-target="#testModal">
+    Test
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">A small test</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {#                <div class="form-check">#}
+                {#                    <p>1. HTML的全称是什么？</p>#}
+                {#                    <form id="question1">#}
+                {#                        <input class="form-check-input" type="radio" name="answer" value="A" id="option1">#}
+                {#                        <label class="form-check-label" for="option1">A. Hyper Text Markup Language</label><br>#}
+                {##}
+                {#                        <input class="form-check-input" type="radio" name="answer" value="B" id="option2">#}
+                {#                        <label class="form-check-label" for="option2">B. Hyperlinks and Text Markup Language</label><br>#}
+                {##}
+                {#                        <input class="form-check-input" type="radio" name="answer" value="C" id="option3">#}
+                {#                        <label class="form-check-label" for="option3">C. Home Tool Markup Language</label><br>#}
+                {##}
+                {#                        <button type="button" class="btn btn-primary btn-sm submitBtn" onclick="checkAnswer()">Submit</button>#}
+                {#                    </form>#}
+                {#                    <div id="result" class="submitRes"></div>#}
+                {#                </div>#}
+                <div class="question-container">
+                    <p id="question-text">Loading question...</p>
+                    <form id="question-form">
+                        <!-- Radio buttons will be dynamically inserted here -->
+                    </form>
+                    <p id="warning-message" class="warning" style="display: none;">Please select an answer.</p>
+                    <div class="actions">
+                        <button type="button" id="next-btn" class="btn btn-primary btn-sm" onclick="nextQuestion()">
+                            Next
+                        </button>
+                        <button type="button" id="submit-btn" class="btn btn-primary btn-sm" onclick="submitQuiz()"
+                                style="display: none;">Submit
+                        </button>
+                    </div>
+                </div>
+
+                <div class="question-review" style="display: none;">
+                    <h2>Review Your Answers</h2>
+                    <div id="review-container"></div>
+                    <div id="score-container"></div> <!-- To display the score -->
+                    <button type="button" class="btn btn-primary btn-sm" onclick="restartQuiz()">Restart Quiz</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+[
+    {
+        "question": "What does the Dena'ina word 'chin'an' mean?",
+        "options": [
+            { "text": "A. Thank you", "correct": true },
+            { "text": "B. Hello", "correct": false },
+            { "text": "C. Goodbye", "correct": false }
+        ]
+    },
+    {
+        "question": "Which of the following is a Dena'ina greeting?",
+        "options": [
+            { "text": "A. Tsin'aen", "correct": false },
+            { "text": "B. Enaa baasee'", "correct": true },
+            { "text": "C. Igalyuu", "correct": false }
+        ]
+    },
+    {
+        "question": "What does the Dena'ina word 'Nuch'en' mean?",
+        "options": [
+            { "text": "A. Water", "correct": false },
+            { "text": "B. Bear", "correct": true },
+            { "text": "C. Sky", "correct": false }
+        ]
+    }
+]
